@@ -15,7 +15,7 @@ app.get('*', (req, res) => {
 });
 
 app.get('/titles', (req, res) => {
-    fs.readFile('lyrics.csv', 'utf8', (err, data) => {
+    fs.readFile(path.join(__dirname, 'lyrics.csv'), 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading the CSV file:', err);
             res.status(500).send('Internal Server Error');
