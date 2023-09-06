@@ -3,6 +3,7 @@ const app = express();
 const PORT = 4600;
 const fs = require('fs');
 const Papa = require('papaparse');
+const path = require('path');
 
 // ミドルウェア
 app.use(express.json()); // リクエストのボディをJSONとして解析
