@@ -35,7 +35,7 @@ app.post('/submit', (req, res) => {
 
 
     // CSVファイルを読み込む
-    const csvData = fs.readFileSync('lyrics.csv', 'utf8');
+    const csvData = fs.readFileSync(path.join(__dirname, 'lyrics.csv'), 'utf8');
 
     // CSVデータをパースする
     const results = Papa.parse(csvData, {
