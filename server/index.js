@@ -10,9 +10,6 @@ app.use(express.json()); // リクエストのボディをJSONとして解析
 app.use(express.static(path.join(__dirname, '../client/build')));
 
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build/index.html'));
-});
 
 app.get('/titles', (req, res) => {
     fs.readFile(path.join(__dirname, 'lyrics.csv'), 'utf8', (err, data) => {
@@ -61,6 +58,11 @@ app.post('/submit', (req, res) => {
     }
 });
 
+
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
 
 // 404エラーハンドラ
 app.use((req, res, next) => {
