@@ -18,7 +18,7 @@ function AnswerTitle(props) {
 
     useEffect(() => {
         // サーバーから歌詞を取得
-        fetch('/sublyrics')
+        fetch('/api/sublyrics')
             .then(response => response.json())
             .then(data => {
                 
@@ -66,7 +66,7 @@ function AnswerTitle(props) {
 
     const handleRestart = () => {
 
-        fetch('/sublyrics')
+        fetch('/api/sublyrics')
             .then(response => response.json())
             .then(data => {
                 setLyrics(data);

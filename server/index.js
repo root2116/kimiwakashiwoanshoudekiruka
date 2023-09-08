@@ -4,6 +4,7 @@ const PORT = process.env.PORT || 4600;
 const fs = require('fs');
 const Papa = require('papaparse');
 const path = require('path');
+const levenshtein = require('fast-levenshtein');
 
 // ミドルウェア
 app.use(express.json()); // リクエストのボディをJSONとして解析
@@ -11,7 +12,7 @@ app.use(express.static(path.join(__dirname, '../client/build')));
 
 
 
-app.get('/titles', (req, res) => {
+app.get('/api/titles', (req, res) => {
     fs.readFile(path.join(__dirname, 'lyrics.csv'), 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading the CSV file:', err);
@@ -30,12 +31,12 @@ app.get('/titles', (req, res) => {
     });
 });
 
-app.post('/submit', (req, res) => {
-    const { hash, title } = req.body;
+app.post('/api/submit', (req, res) => {
+    const { lyrics, title } = req.body;
 
 
     // CSVファイルを読み込む
-    const csvData = fs.readFileSync(path.join(__dirname, 'lyrics.csv'), 'utf8');
+    const csvData = fs.readFileSync(path.join(__dirname, 'lyrics_.csv'), 'utf8');
 
     // CSVデータをパースする
     const results = Papa.parse(csvData, {
@@ -46,20 +47,22 @@ app.post('/submit', (req, res) => {
     // titleが一致するレコードを探す
     const matchingRecord = results.data.find(record => record.title === title);
 
-    // titleが一致するレコードが見つかった場合、hashを比較
+    // titleが一致するレコードが見つかった場合、レーベンシュタイン距離を計算
     if (matchingRecord) {
-        if (matchingRecord.hash === hash) {
-            return res.json({ success: true, message: 'yes' });
-        } else {
-            return res.json({ success: true, message: 'no' });
-        }
+        const normalizedLyrics = matchingRecord.lyrics.replace(/\s+|[\-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]/g, '')
+        const distance = levenshtein.get(normalizedLyrics, lyrics);
+
+        // フィードバックをレスポンスとして返す
+        
+        res.json({ distance: distance });
+        
     } else {
-        return res.status(404).json({ success: false, message: 'Title not found' });
+        res.status(404).json({ error: 'Title not found in the database.' });
     }
 });
 
 
-app.get('/sublyrics', (req, res) => {
+app.get('/api/sublyrics', (req, res) => {
     fs.readFile(path.join(__dirname, 'lyrics_.csv'), 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Failed to read the CSV file.' });
@@ -92,7 +95,7 @@ app.get('/sublyrics', (req, res) => {
 
 
 
-app.get('/fillin', (req, res) => {
+app.get('/api/fillin', (req, res) => {
     fs.readFile(path.join(__dirname, 'lyrics_.csv'), 'utf8', (err, data) => {
         if (err) {
             return res.status(500).json({ error: 'Failed to read the CSV file.' });

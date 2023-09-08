@@ -18,7 +18,7 @@ function FillinLyrics(props) {
 
     useEffect(() => {
         // サーバーから歌詞を取得
-        fetch('/fillin')
+        fetch('/api/fillin')
             .then(response => response.json())
             .then(data => {
 
@@ -67,7 +67,7 @@ function FillinLyrics(props) {
 
     const handleRestart = () => {
 
-        fetch('/fillin')
+        fetch('/api/fillin')
             .then(response => response.json())
             .then(data => {
                 setLyrics(data);

@@ -10,12 +10,12 @@ function ReciteFullLyrics(props) {
     const [isSelected, setIsSelected] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogMessage, setDialogMessage] = useState('');
-
+    const [result, setResult] = useState(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await fetch('/titles');
+                const response = await fetch('/api/titles');
                 const data = await response.json();
                 setItems(data);
             } catch (error) {
@@ -29,19 +29,19 @@ function ReciteFullLyrics(props) {
     async function handleButtonClick() {
 
         const normalized = normalizeLyrics(lyrics);
-        console.log(normalized);
+        // console.log(normalized);
         // 正規化した歌詞からハッシュ値を計算
-        const hashValue = await sha256(normalized);
+        // const hashValue = await sha256(normalized);
 
 
         try {
 
-            const response = await fetch('/submit', {   // Adjust the endpoint URL accordingly
+            const response = await fetch('/api/submit', {   // Adjust the endpoint URL accordingly
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ hash: hashValue, title: title })   // Send both title and lyrics
+                body: JSON.stringify({ lyrics: normalized, title: title })   // Send both title and lyrics
             });
 
             if (!response.ok) {
@@ -49,13 +49,12 @@ function ReciteFullLyrics(props) {
             }
 
             const result = await response.json();
-            console.log(result);
-            if (result.success) {
-                if (result.message === "yes") {
-                    setDialogMessage("正解！");
-                } else {
-                    setDialogMessage("違います");
-                }
+            setResult(result.distance);
+            if (result.distance == 0) {
+                setDialogMessage("正解！");
+                setOpenDialog(true);
+            } else {
+                setDialogMessage("残念。");
                 setOpenDialog(true);
             }
 
@@ -85,10 +84,10 @@ function ReciteFullLyrics(props) {
                 <DialogTitle>{dialogMessage}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        {dialogMessage === "正解！" ? "君は『" + title + "』の歌詞を暗唱できた。" : "まだまだだね。"}
+                        {result === 0 ? "君は『" + title + "』の歌詞を暗唱できた。" : result + "文字違うね。"}
                     </DialogContentText>
                 </DialogContent>
-                <DialogActions>
+                <DialogActions style={{ justifyContent: 'space-between', padding: '16px 24px' }}>
                     <Button onClick={props.resetMode} color="primary">
                         ホームへ
                     </Button>
